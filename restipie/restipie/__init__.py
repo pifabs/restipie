@@ -1,4 +1,6 @@
+import ast
 import json
+
 import frappe
 from werkzeug.exceptions import BadRequest, Unauthorized
 
@@ -44,6 +46,11 @@ def handle_req(*args, **kwargs):
 		return response.handle_err(BadRequest(str(e)))
 	except frappe.exceptions.AuthenticationError as e:
 		return response.handle_err(Unauthorized(str(e)))
+	except (
+		frappe.exceptions.DuplicateEntryError,
+		frappe.exceptions.UniqueValidationError) as e:
+		e = frappe.exceptions.ValidationError(str(e.args[2].args[1]))
+		return response.handle_err(e)
 	except Exception as e:
 		print(frappe.get_traceback())
 		return response.handle_err(e)
