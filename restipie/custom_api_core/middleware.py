@@ -1,48 +1,57 @@
 import json
 
 import frappe
+from frappe.exceptions import ValidationError
 
 import jwt
 from jsonschema import Draft7Validator, FormatChecker, exceptions
 from werkzeug.exceptions import BadRequest, Unauthorized
 
+
 def authenticate(*args, **kwargs):
 	token = frappe.get_request_header("Authorization")
-
 
 	decoded = validate_token(token)
 	validate_session(decoded.get("sid"))
 
-	# set user only after token and session validation
-	user = frappe.get_doc("User", { "email": decoded.get("user") })
-	frappe.set_user(user.name)
+	user = frappe.get_value("User", { "email": decoded.get("user") })
+	if not user:
+		raise ValidationError("Invalid token")
+
 
 	kwargs["decoded"] = decoded
 	return args, kwargs
 
 
 def validate_token(token):
-	token = token.split(" ")[0] if token else None
-	if not token: raise Unauthorized("Missing token")
+	if not token:raise Unauthorized("Missing token")
+	token_parts = token.split(" ")
 
-	jwt_secret = frappe.local.conf.get('jwt_secret')
-	jwt_alg = frappe.local.conf.get('jwt_alg')
+	if len(token_parts) != 2: raise Unauthorized("Invalid token")
+	token = token_parts[1] if token else None
+	if not token: raise Unauthorized("Invalid token")
+
+	jwt_secret = frappe.local.conf.get('jwt_secret', "secret")
+	jwt_alg = frappe.local.conf.get('jwt_alg', "HS256")
+	site = frappe.local.site_path.replace("./", "")
 
 	try:
 		decoded = jwt.decode(
 			token,
 			jwt_secret,
 			algorithms=[jwt_alg],
-			issuer="codedisruptors",
-			audience="restipieclient",
+			issuer=site,
+			audience="{}-client".format(site),
 			# leeway=timedelta(seconds=30)
 		)
 		return decoded
 	except Exception as e:
-		raise Unauthorized("You are not logged in. Please log in and try again.")
+		raise Unauthorized("Invalid token")
 
 
 def validate_session(sid):
+	if frappe.session.user == "Guest":
+		raise Unauthorized("You are not logged in. Please log in and try again.")
 	user_details = frappe.db.sql(
 		"""select user from tabSessions where sid=%s""",
 		sid,
