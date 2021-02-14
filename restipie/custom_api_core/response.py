@@ -30,6 +30,14 @@ def as_json(*args, **kwargs):
 
 	response.mimetype = 'application/json'
 	response.charset = 'utf-8'
+	response.headers["X-Frame-Options"] = "DENY"
+	response.headers["X-Content-Type-Options"] = "nosniff"
+	response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+	response.headers["Cache-Control"] = "no-store"
+	response.headers["Content-Security-Policy"] =  "default-src https: frame-ancestors 'none'"
+	response.headers["Feature-Policy"] = "'none'"
+	response.headers["Referrer-Policy"] = "no-referrer"
+
 
 	data = kwargs.get("data")
 	status_code = data.get("status_code")
