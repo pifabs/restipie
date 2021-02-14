@@ -19,7 +19,7 @@ def signup(*args, **kwargs):
 		return response.JSONResponse(
 			status_code=201,
 			message="Successfully created account!",
-			data=user
+			data=data
 		)
 	except Exception as e:
 		raise e
