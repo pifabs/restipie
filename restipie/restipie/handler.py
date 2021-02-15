@@ -21,7 +21,7 @@ def handle(*args, **kwargs):
 	mwargs = args
 	mwkwargs = kwargs
 	for middleware in middlewares:
-		_, mwkwargs = middleware(*mwargs, **mwkwargs)
+		mwargs, mwkwargs = middleware(*mwargs, **mwkwargs)
 
 		if "errors" in mwkwargs and len(mwkwargs.get("errors")):
 			return response.as_json(
