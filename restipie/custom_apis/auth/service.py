@@ -115,6 +115,14 @@ def generate_token(user):
 	).decode("utf-8")
 
 
+def logout(*args, **kwargs):
+	from frappe.sessions import delete_session, clear_sessions
+
+	token = kwargs.get("decoded")
+	delete_session(token.get("sid"))
+	return { "message" :  "Goodbye!"}
+
+
 def validate_password(currentPassword, newPassword, confirmPassword):
 	confirmed = (newPassword == confirmPassword)
 	same_passwords = currentPassword == newPassword and confirmed
