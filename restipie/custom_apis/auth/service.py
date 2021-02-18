@@ -34,7 +34,7 @@ def validate_email(email):
 	duplicates = frappe.get_list("User", filters={"name": email}, fields="name")
 
 	if duplicates:
-		raise ValidationError("{} already in used.".format(email))
+		raise ValidationError("Email or mobile no. already in used.")
 
 
 def validate_mobile_no(mobile_no):
@@ -45,7 +45,7 @@ def validate_mobile_no(mobile_no):
 	)
 
 	if duplicates:
-		raise ValidationError("{} already in used.".format(mobile_no))
+		raise ValidationError("Email or mobile no. already in used.")
 
 
 def simple_login(*args, **kwargs):
@@ -58,7 +58,6 @@ def simple_login(*args, **kwargs):
 	update_session_data()
 
 	user = get_user(user_id)
-	user["id"] = user_id
 	user["email"] = email
 	user["token"] = generate_token(user_id)
 
@@ -68,6 +67,7 @@ def simple_login(*args, **kwargs):
 def get_user(email):
 	user = frappe.get_doc("User", email)
 	return {
+		"_id": user._id,
 		"fullname": user.first_name,
 		"location": user.location
 	}

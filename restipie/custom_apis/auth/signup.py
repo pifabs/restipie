@@ -15,6 +15,7 @@ def signup(*args, **kwargs):
 	try:
 		data = kwargs.get("data")
 		user = service.create_account(**data)
+		data["_id"] = user._id
 
 		return response.JSONResponse(
 			status_code=201,
