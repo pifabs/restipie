@@ -1,1 +1,1 @@
-from . import login, signup, logout
+from . import login, signup, logout, change_password
