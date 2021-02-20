@@ -1,1 +1,1 @@
-from . import login, signup, logout, change_password, forgot_password
+from . import controller
