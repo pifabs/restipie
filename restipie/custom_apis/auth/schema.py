@@ -22,7 +22,7 @@ signup_schema = {
 
 simple_login_schema = {
 	"$schema":"http://json-schema.org/draft-07/schema#",
-	"title":"Login",
+	"title":"Simple Login",
 	"type" : "object",
 	"properties" : {
 		"email": { "type": "string", "format": "email" },
@@ -53,6 +53,32 @@ login_schema = {
 		}
 	},
 	"else": {
-		"properties": { "mobile_no": { "type" : "string", "pattern": "^[0-9]{11}$" } }
+		"properties": {
+			"mobile_no": {
+				"type" : "string",
+				"pattern": "^[0-9]{11}$"
+			}
+		}
 	}
+}
+
+
+change_password_schema = {
+	"$schema":"http://json-schema.org/draft-07/schema#",
+	"title":"Change Password",
+	"type" : "object",
+	"properties" : {
+		"old_pwd": {
+			"type": "string",
+			"minLength": 8,
+			"maxLength": 64
+		},
+		"new_pwd": {
+			"type": "string",
+			"minLength": 8,
+			"maxLength": 64
+		},
+	},
+	"required": ["old_pwd", "new_pwd"],
+
 }

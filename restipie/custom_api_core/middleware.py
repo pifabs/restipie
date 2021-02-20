@@ -12,12 +12,16 @@ def authenticate(*args, **kwargs):
 	token = frappe.get_request_header("Authorization")
 
 	decoded = validate_token(token)
-	validate_session(decoded.get("sid"))
-
-	user = frappe.get_value("User", { "email": decoded.get("user") })
+	user = frappe.get_value(
+		"User", {
+			"email": decoded.get("user"),
+			"enabled": 1
+		}
+	)
 	if not user:
 		raise ValidationError("Invalid token")
 
+	validate_session(decoded.get("user"), decoded.get("sid"))
 
 	kwargs["decoded"] = decoded
 	return args, kwargs
@@ -49,15 +53,15 @@ def validate_token(token):
 		raise Unauthorized("Invalid token")
 
 
-def validate_session(sid):
-	if frappe.session.user == "Guest":
-		raise Unauthorized("You are not logged in. Please log in and try again.")
-	user_details = frappe.db.sql(
-		"""select user from tabSessions where sid=%s""",
-		sid,
+def validate_session(email, sid):
+	# if frappe.session.user == "Guest":
+	# 	raise Unauthorized("You are not logged in. Please log in and try again.")
+	session = frappe.db.sql(
+		"""select user from tabSessions where user = %s and sid=%s""",
+		(email, sid),
 		as_dict=True
 	)
-	if not user_details:
+	if not session:
 		raise Unauthorized("You are not logged in. Please log in and try again.")
 
 
