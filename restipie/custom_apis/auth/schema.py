@@ -82,3 +82,14 @@ change_password_schema = {
 	"required": ["old_pwd", "new_pwd"],
 
 }
+
+
+password_reset_request_schema = {
+	"$schema":"http://json-schema.org/draft-07/schema#",
+	"title":"Password Reset Request",
+	"type" : "object",
+	"properties" : {
+		"email": { "type": "string", "format": "email" }
+	},
+	"required": ["email"]
+}
