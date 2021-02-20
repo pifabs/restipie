@@ -122,6 +122,12 @@ def logout(*args, **kwargs):
 	from frappe.sessions import delete_session, clear_sessions
 
 	token = kwargs.get("decoded")
+
+	qs = kwargs.get("query_strings")
+	if qs.get("sessions", None) == "all":
+		clear_sessions(token.get("user"), force=True)
+		return
+
 	delete_session(token.get("sid"))
 	return { "message" :  "Goodbye!"}
 
