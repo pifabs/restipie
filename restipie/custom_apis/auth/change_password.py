@@ -1,12 +1,4 @@
-import json
-from datetime import datetime, timedelta
-
 import frappe
-from frappe import _
-from frappe.core.doctype.user.user import (
-	handle_password_test_fail,
-	test_password_strength
-)
 
 from restipie.custom_api_core import request
 from restipie.custom_api_core import response
