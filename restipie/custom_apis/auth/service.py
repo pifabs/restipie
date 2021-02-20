@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 
 import jwt
 import frappe
+from frappe.core.doctype.user import user
 from frappe.exceptions import ValidationError
 
 
@@ -123,27 +124,45 @@ def logout(*args, **kwargs):
 	return { "message" :  "Goodbye!"}
 
 
-def validate_password(currentPassword, newPassword, confirmPassword):
-	confirmed = (newPassword == confirmPassword)
-	same_passwords = currentPassword == newPassword and confirmed
+def change_password(*args, **kwargs):
+	data = kwargs.get("data")
+	decoded = kwargs.get("decoded")
+	old_pwd = data.get("old_pwd")
+	new_pwd = data.get("new_pwd")
+
+	frappe.utils.password.check_password(decoded.get("user"), old_pwd)
+
+	validate_password(old_pwd, new_pwd)
+
+	check_password_strength(decoded.get("user"), new_pwd)
+
+	passw = frappe.utils.password.update_password(
+		decoded.get("user"),
+		new_pwd,
+		logout_all_sessions=True
+	)
+	
+	return { "message": "Password successfully updated.", "data": None }
+
+
+def validate_password(old_pwd, new_pwd):
+	same_passwords = old_pwd == new_pwd
 	if same_passwords:
-		return { "message": "New password cannot be the same with your old password." }
-	if not confirmed:
-		return { "message": "Please confirm your password." }
+		raise ValidationError("New password cannot be the same with your old password.")
 
 
-def check_password_strength(user, new_password):
-	user = frappe.get_doc("User", user)
+def check_password_strength(email, new_password):
+	_user = frappe.get_doc("User", email)
 	user_data = (
-		user.first_name,
-		user.middle_name,
-		user.last_name,
-		user.email,
-		user.birth_date
+		_user.first_name,
+		_user.middle_name,
+		_user.last_name,
+		_user.email,
+		_user.birth_date
 	)
 
-	result = test_password_strength(new_password=new_password, user_data=user_data)
+	result = user.test_password_strength(new_password=new_password, user_data=user_data)
 	feedback = result.get("feedback", None)
 
 	if feedback and not feedback.get('password_policy_validation_passed', False):
-		handle_password_test_fail(result)
+		user.handle_password_test_fail(result)
