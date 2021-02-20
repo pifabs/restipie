@@ -3,6 +3,8 @@ from datetime import datetime, timedelta
 
 import jwt
 import frappe
+from frappe import _
+from frappe.utils.background_jobs import enqueue
 from frappe.core.doctype.user import user
 from frappe.exceptions import ValidationError
 
@@ -166,3 +168,29 @@ def check_password_strength(email, new_password):
 
 	if feedback and not feedback.get('password_policy_validation_passed', False):
 		user.handle_password_test_fail(result)
+
+
+def handle_pwd_reset_request(*args, **kwargs):
+	message = {
+		"message": "If that email address is in our database, we will send you an email to reset your password.",
+		"data": None
+	}
+	email = kwargs.get("email")
+
+	try:
+		user = frappe.get_cached_doc("User", {"name": email, "enabled": 1})
+
+		user.validate_reset_password()
+		enqueue(
+			user.reset_password,
+			queue="short",
+			is_async=True,
+			send_email=True
+		)
+
+		return message
+	except frappe.DoesNotExistError as e:
+		frappe.clear_messages()
+		return message
+	except Exception as e:
+		raise e
