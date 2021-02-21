@@ -63,6 +63,50 @@ login_schema = {
 }
 
 
+login_2fa_schema = {
+	"$schema":"http://json-schema.org/draft-07/schema#",
+	"title":"2FA Login",
+	"type" : "object",
+	"properties" : {
+		"login_by" : {
+			"enum": ["email", "mobile_no"]
+		}
+	},
+	"required": ["login_by"],
+	"if": {
+		"properties": { "login_by": { "const": "email" } }
+	},
+	"then": {
+		"properties": {
+			"email": { "type": "string", "format": "email" }
+		},
+		"required": ["email"]
+	},
+	"else": {
+		"properties": {
+			"mobile_no": {
+				"type" : "string",
+				"pattern": "^[0-9]{11}$"
+			}
+		},
+		"required": ["mobile_no"]
+	}
+}
+
+
+confirm_2fa_schema = {
+	"$schema":"http://json-schema.org/draft-07/schema#",
+	"title":"2FA Login",
+	"type" : "object",
+	"properties": {
+		"email": { "type": "string", "format": "email" },
+		"otp": { "type": "string", "pattern" : "^[0-9]{6}$" },
+		"tmp_id": { "type": "string", "pattern" : "^[a-zA-Z0-9]*$"  }
+	},
+	"required": ["otp", "tmp_id", "email"]
+}
+
+
 change_password_schema = {
 	"$schema":"http://json-schema.org/draft-07/schema#",
 	"title":"Change Password",
