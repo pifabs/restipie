@@ -1,12 +1,23 @@
 import json
 from datetime import datetime, timedelta
 
-import jwt
+import jwt, pyotp
 import frappe
 from frappe import _
 from frappe.utils.background_jobs import enqueue
 from frappe.core.doctype.user import user
 from frappe.exceptions import ValidationError
+from frappe.twofactor import (
+	should_run_2fa,
+	authenticate_for_2factor,
+	get_cached_user_pass,
+	two_factor_is_enabled_for_,
+	confirm_otp_token,
+	get_otpsecret_for_,
+	get_verification_obj
+)
+
+from werkzeug.exceptions import NotImplemented
 
 
 def create_account(*args, **kwargs):
@@ -57,14 +68,7 @@ def simple_login(*args, **kwargs):
 	password = data.get("password")
 
 	user_id = frappe.utils.password.check_password(email, password)
-	frappe.local.login_manager.login_as(email)
-	update_session_data()
-
-	user = get_user(user_id)
-	user["email"] = email
-	user["token"] = generate_token(user_id)
-
-	return user
+	return handle_session(email)
 
 
 def get_user(email):
@@ -116,6 +120,39 @@ def generate_token(user):
 		},
 		jwt_secret,
 	).decode("utf-8")
+
+
+def handle_session(email):
+	frappe.local.login_manager.login_as(email)
+	update_session_data()
+
+	user = get_user(email)
+	user["email"] = email
+	user["token"] = generate_token(email)
+
+	return user
+
+
+def login_2fa(*args, **kwargs):
+	if kwargs.get("data").get("login_by") == "mobile_no":
+		raise NotImplemented("mobile_no not yet supported.")
+
+	email = kwargs.get("data").get("email")
+	authenticate_for_2factor(email)
+
+	return {
+		"message": "Verification code has been sent to your email.",
+		"data": {"tmp_id": frappe.local.response['tmp_id']}
+	}
+
+
+def confirm_2fa(*args, **kwargs):
+	otp = kwargs.get("data").get("otp")
+	email = kwargs.get("data").get("email")
+	tmp_id = kwargs.get("data").get("tmp_id")
+	result = confirm_otp_token(frappe.local.login_manager,otp=otp,tmp_id=tmp_id)
+	if result:
+		return handle_session(email)
 
 
 def logout(*args, **kwargs):
