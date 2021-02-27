@@ -90,6 +90,6 @@ def validate_schema(schema):
 				kwargs["errors"] = errors
 			return args, kwargs
 		except exceptions.ValidationError as v:
-			rais(str(v))
+			raise (str(v))
 
 	return validator
