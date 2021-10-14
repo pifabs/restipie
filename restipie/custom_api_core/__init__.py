@@ -4,8 +4,6 @@ import json
 import base64
 
 import frappe
-from helper import log, _import_all
-from router import CustomRouter
 from werkzeug.exceptions import (
 	BadRequest,
 	Unauthorized,
@@ -13,7 +11,9 @@ from werkzeug.exceptions import (
 	InternalServerError,
 )
 
+from restipie.helper import log, _import_all
 from . import base, request, response, middleware, router
+from .router import CustomRouter
 
 
 def init(name):
@@ -23,7 +23,7 @@ def init(name):
 def handle(*args, **kwargs):
 	"""main request handler"""
 	try:
-		endpoint, params = router.CustomRouter.get_instance().adapter_match()
+		endpoint, params = CustomRouter.get_instance().adapter_match()
 
 		path = frappe.request.path
 		form = frappe.local.request.form.to_dict()
@@ -72,7 +72,7 @@ def handle(*args, **kwargs):
 		log("ValidationError")
 		return response.handle_err(e)
 	except Exception as e:
-		log("Exception")
+		log(e.__class__.__name__)
 		return response.handle_err(e)
 	finally:
 		frappe.auth.clear_cookies()
