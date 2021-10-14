@@ -1,5 +1,6 @@
 import importlib
-import pathlib
+
+import frappe
 
 try:
 	from importlib import resources
@@ -11,9 +12,14 @@ def _import(package, plugin):
 	"""Import the given plugin file from a package"""
 	importlib.import_module(f"{package}.{plugin}")
 
+
 def _import_all(package):
 	"""Import all plugins in a package"""
 	files = resources.contents(package)
 	plugins = [f[:-3] for f in files if f.endswith(".py") and f[0] != "_"]
 	for plugin in plugins:
 		_import(package, plugin)
+
+
+def log(title):
+	frappe.log_error(frappe.get_traceback(), f"API ERROR: {title}")

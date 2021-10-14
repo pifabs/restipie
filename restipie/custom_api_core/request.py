@@ -1,7 +1,7 @@
 from .router import CustomRouter
 
 
-def api(method, path, middlewares=()):
+def api(method, path, middlewares=(), private=True):
 	"""Registers a function and its middlewares.
 
 	:param method: str
@@ -23,6 +23,7 @@ def api(method, path, middlewares=()):
 			method.upper(),
 			path,
 			handler,
-			middlewares=middlewares
+			middlewares=middlewares,
+			private=private
 		)
 	return inner_fn

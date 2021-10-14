@@ -36,9 +36,9 @@ repos:
       - id: commitizen
         stages: [commit-msg]
 
-  - repo: https://github.com/pycqa/isort
-    rev: 5.8.0
-    hooks:
-      - id: isort
-        name: isort (python)
-        exclude: ".*setup.py$"
+  # - repo: https://github.com/pycqa/isort
+  #   rev: 5.8.0
+  #   hooks:
+  #     - id: isort
+  #       name: isort (python)
+  #       exclude: ".*setup.py$"
