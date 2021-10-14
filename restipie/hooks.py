@@ -11,6 +11,8 @@ app_color = "grey"
 app_email = "hejipalanski@yahoo.com"
 app_license = "MIT"
 
+required_apps = ["frappe"]
+
 # Includes in <head>
 # ------------------
 
