@@ -1,0 +1,44 @@
+exclude: 'node_modules|.git'
+default_stages: [commit]
+fail_fast: false
+
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.0.1
+    hooks:
+      - id: trailing-whitespace
+        files: "restipie.*"
+        exclude: ".*json$|.*txt$|.*csv|.*md"
+      - id: check-yaml
+      - id: no-commit-to-branch
+        args: ['--branch', 'main']
+      - id: check-merge-conflict
+      - id: check-ast
+
+  - repo: https://gitlab.com/pycqa/flake8
+    rev: 3.9.2
+    hooks:
+      - id: flake8
+        args: ['--config', '.flake8']
+        exclude: ".*setup.py$"
+
+  - repo: https://github.com/returntocorp/semgrep
+    rev:  v0.66.0
+    hooks:
+      - id: semgrep
+        files: ''
+        args: ['--config', '.github/helper/semgrep_rules', '--error']
+
+  - repo: https://github.com/commitizen-tools/commitizen
+    rev: v2.18.1
+    hooks:
+      - id: commitizen
+        stages: [commit-msg]
+
+  - repo: https://github.com/pycqa/isort
+    rev: 5.8.0
+    hooks:
+      - id: isort
+        name: isort (python)
+        exclude: ".*setup.py$"
