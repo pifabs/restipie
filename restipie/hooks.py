@@ -86,10 +86,7 @@ doc_events = {
 	# 	"on_update": "method",
 	# 	"on_cancel": "method",
 	# 	"on_trash": "method"
-	# },
-	"User": {
-		"before_insert": "restipie.doc_hooks.user.set_id"
-	}
+	# }
 }
 
 # Scheduled Tasks

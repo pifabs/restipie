@@ -1,7 +1,7 @@
 from .router import CustomRouter
 
 
-def api(method, path, middlewares=(), private=True):
+def api(method, path, middlewares=None, private=True):
 	"""Registers a function and its middlewares.
 
 	:param method: str
@@ -14,7 +14,7 @@ def api(method, path, middlewares=(), private=True):
 
 		Example:
 
-		@api("GET", "/api/custom/ping", middlewares=[authenticate])
+		@api("GET", "/api/custom/ping")
 		def ping(*args, **kwargs):
 			return "pong"
 	"""
@@ -23,7 +23,7 @@ def api(method, path, middlewares=(), private=True):
 			method.upper(),
 			path,
 			handler,
-			middlewares=middlewares,
+			middlewares=middlewares or (),
 			private=private
 		)
 	return inner_fn

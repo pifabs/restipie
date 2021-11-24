@@ -1,3 +1,2 @@
 importlib_resources
 importlib
-jsonschema
