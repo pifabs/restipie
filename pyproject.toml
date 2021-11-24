@@ -6,11 +6,13 @@ src_paths = ["isort", "test"]
 
 [tool.commitizen]
 name = "cz_conventional_commits"
-version = "0.1.0"
+version = "0.0.1"
 version_files = [
-	"src/__version__.py",
+	"./restipie/__init__.py",
 	"pyproject.toml:version"
 ]
+annotated_tag = true
+tag_format = "v$major.$minor.$patch$prerelease"
 style = [
 	["qmark", "fg:#ff9d00 bold"],
 	["question", "bold"],

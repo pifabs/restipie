@@ -3,7 +3,6 @@ import ast
 import json
 import base64
 
-import frappe
 from werkzeug.exceptions import (
 	BadRequest,
 	Unauthorized,
@@ -11,8 +10,11 @@ from werkzeug.exceptions import (
 	InternalServerError,
 )
 
+import frappe
+from frappe.utils.response import build_response
+
 from restipie.helper import log, _import_all
-from . import base, request, response, middleware, router
+from . import response, middleware, router
 from .router import CustomRouter
 
 
@@ -74,8 +76,7 @@ def handle(*args, **kwargs):
 	except Exception as e:
 		log(e.__class__.__name__)
 		return response.handle_err(e)
-	finally:
-		frappe.auth.clear_cookies()
+
 
 
 class NotImplementedError(NotImplemented):
@@ -105,5 +106,7 @@ def _handle(*args, **kwargs):
 				}
 			)
 
-	result = fn(*mwargs, **mwkwargs)
-	return response.as_json(data=result.as_dict())
+	frappe.response["data"] = fn(*mwargs, **mwkwargs)
+	res = build_response("json")
+	# res.status_code =
+	return res
